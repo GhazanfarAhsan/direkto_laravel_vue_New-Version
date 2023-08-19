@@ -545,6 +545,9 @@
 // import excelParser from "../excel-parser";
 import moment from 'moment'
 import * as XLSX from "xlsx"
+import FileSaver from 'file-saver';
+import * as ExcelJS from "exceljs/dist/exceljs.min.js";
+
 import exportFromJSON from "export-from-json";
 import Breadcrumb from "../../components/Layout/Breadcrumb.vue";
 
@@ -784,34 +787,17 @@ export default {
 
    },
    downloadFile(payload) {
-      
     store.dispatch("get_datos_restricciones", payload).then((response) => {
-
       const Frente = [];
       const Fase = [];
-      const Actividad = [];
-      const Restriccion = [];
       const TipoRestriccion = [];
-      const FechaRequerida = [];
-      const FechaConciliada = [];
       const Responsable = [];
       const Estado = [];
       for(let i = 0; i < response.restricciones.length; i ++){
         Frente[i] = response.restricciones[i]['desFrente'];
         Fase[i] = response.restricciones[i]['listaFase'][0]['desFase'];
         for(let j = 0; j < response.restricciones[i]['listaFase'][0]['listaRestricciones'].length; j ++){
-          if(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desActividad'] && (!Actividad.includes(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desActividad']))){
-            Actividad.push(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desActividad']);
-          }
-          if(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desRestriccion'] && (!Restriccion.includes(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desRestriccion']))){
-            Restriccion.push(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desRestriccion']);
-          }
-          if(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['dayFechaRequerida'] && (!FechaRequerida.includes(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['dayFechaRequerida']))){
-            FechaRequerida.push(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['dayFechaRequerida']);
-          }
-          if(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['dayFechaConciliada'] && (!FechaConciliada.includes(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['dayFechaConciliada']))){
-            FechaConciliada.push(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['dayFechaConciliada']);
-          }
+
           if(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desUsuarioResponsable'] && (!Responsable.includes(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desUsuarioResponsable']))){
             Responsable.push(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desUsuarioResponsable']);
           }
@@ -824,16 +810,36 @@ export default {
         Estado[h] = response.estados[h]['desEstado'];
       }
       const Solicitante = response.solicitanteActual;
-      const data_array = [{'Frente': Frente, 'Fase': Fase, 'Actividad': Actividad, 'Restriccion': Restriccion, 'Tipo Restriccion': TipoRestriccion, 'Fecha  Requerida': FechaRequerida, 'Fecha Conciliada': FechaConciliada, 'Responsable': Responsable, 'Estado': Estado, 'Solicitante': Solicitante}];
+      const data_array = [
+        {"Frente": Frente}, 
+        {"Fase": Fase}, 
+        {"Actividad": ""},
+        {"Restriccion": ""},
+        {"Tipo Restriccion": TipoRestriccion},  
+        {"Fecha Requerida": ""},
+        {"Fecha Conciliada": ""},
+        {"Responsable": Responsable}, 
+        {"Estado": Estado}, 
+        {"Solicitante": Solicitante}
+      ];
       console.log(data_array)
+       // Convert the JSON object array to a worksheet
+       const worksheet = XLSX.utils.json_to_sheet(data_array);
 
-      const fileName = "plantilla_data_masiva.xlsx";
-      var ws = XLSX.utils.json_to_sheet(data_array);
-      var wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws);
-      XLSX.writeFile(wb,fileName);
+      // Create a workbook and add the worksheet
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+      // Convert the workbook to an XLSX file
+      const xlsxFile = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+      // Save the XLSX file and trigger the download
+      const blob = new Blob([xlsxFile], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      FileSaver.saveAs(blob, 'data.xlsx');
     });
   },
+
+ 
 
     setColumnsStatus: function (payload) {
       let point = this;

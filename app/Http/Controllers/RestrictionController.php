@@ -305,26 +305,7 @@ class RestrictionController extends Controller
         return $request;
     }
 
-    // public function upd_restricciones(Request $request){
-    //     $enviar = array();
-    //     $enviar["flag"]     = 0;
-    //     $enviar["mensaje"]  = "";
-    //     $data   = $request['userInvData']
-
-    //     foreach ($request as $value1) {
-    //         //  print_r($value['desActividad']);
-
-    //         // foreach ($value1 as  $value2) {
-    //             // echo  $value2['desActividad'];
-    //             $enviar["mensaje"]  = $value1['desActividad'];
-    //             // break;
-    //             // $enviar["mensaje"]  = $value2['desActividad'];
-    //         // }
-    //         // break;
-    //     }
-
-    //     return $enviar;
-    // }
+    
 
     public function cron_enviar_notificacionDiaria(){
         $query_proyectos_retrasados = "
@@ -815,15 +796,6 @@ class RestrictionController extends Controller
 
         $tipoRestricciones = Ana_TipoRestricciones::All();
         $areaIntegrante    = Proy_AreaIntegrante::all();
-
-        // $integrantesAnaRes = RestrictionMember::select("ana_integrantes.*", "proy_integrantes.desCorreo as desProyIntegrante", "proy_integrantes.codArea")
-        // ->leftJoin('proy_integrantes', function($join){
-        //     $join->on('proy_integrantes.codProyIntegrante', '=', 'ana_integrantes.codProyIntegrante');
-        //     $join->on('proy_integrantes.codProyecto', '=', 'ana_integrantes.codProyecto');
-
-        //  })
-        //  ->where('ana_integrantes.codProyecto', $request['id'])->get();
-
         $datos_estado = Conf_Estado::where('desModulo', 'ANARES')->get();
 
         $enviar['estadoRestriccion'] = $restriction[0]['codEstado'] == 0 ? true : false;
@@ -836,9 +808,7 @@ class RestrictionController extends Controller
         $enviar['solicitanteActual'] = $usuario[0]['name']." ".$usuario[0]['lastname'];
         $enviar['rolUsuario']        = $rolUsuario;
         $enviar['areaUsuario']       = $areaUsuario;
-
-
-
+        
         return $enviar;
     }
     public function get_front(Request $request) {
