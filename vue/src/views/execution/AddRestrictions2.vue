@@ -787,19 +787,47 @@ export default {
       
     store.dispatch("get_datos_restricciones", payload).then((response) => {
 
-      const Frente = response.restricciones[response.restricciones.length - 1]['desFrente'];
-      const Fase = response.restricciones[response.restricciones.length - 1]['listaFase'][0]['desFase'];
-      const Actividad = response.restricciones[response.restricciones.length - 1]['listaFase'][0]['listaRestricciones'][0]['desActividad'];
-      const Restriccion = response.restricciones[response.restricciones.length - 1]['listaFase'][0]['listaRestricciones'][0]['desRestriccion'];
-      const TipoRestriccion = response.restricciones[response.restricciones.length - 1]['listaFase'][0]['listaRestricciones'][0]['desTipoRestriccion'];
-      const FechaRequerida = response.restricciones[response.restricciones.length - 1]['listaFase'][0]['listaRestricciones'][0]['dayFechaRequerida'];
-      const FechaConciliada = response.restricciones[response.restricciones.length - 1]['listaFase'][0]['listaRestricciones'][0]['dayFechaConciliada'];
-      const Responsable = response.restricciones[response.restricciones.length - 1]['listaFase'][0]['listaRestricciones'][0]['desUsuarioResponsable'];
-      const Estado = response.restricciones[response.restricciones.length - 1]['listaFase'][0]['listaRestricciones'][0]['desEstadoActividad'];
-      const Solicitante = response.restricciones[response.restricciones.length - 1]['listaFase'][0]['listaRestricciones'][0]['desUsuarioSolicitante'];
+      const Frente = [];
+      const Fase = [];
+      const Actividad = [];
+      const Restriccion = [];
+      const TipoRestriccion = [];
+      const FechaRequerida = [];
+      const FechaConciliada = [];
+      const Responsable = [];
+      const Estado = [];
+      for(let i = 0; i < response.restricciones.length; i ++){
+        Frente[i] = response.restricciones[i]['desFrente'];
+        Fase[i] = response.restricciones[i]['listaFase'][0]['desFase'];
+        for(let j = 0; j < response.restricciones[i]['listaFase'][0]['listaRestricciones'].length; j ++){
+          if(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desActividad'] && (!Actividad.includes(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desActividad']))){
+            Actividad.push(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desActividad']);
+          }
+          if(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desRestriccion'] && (!Restriccion.includes(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desRestriccion']))){
+            Restriccion.push(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desRestriccion']);
+          }
+          if(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['dayFechaRequerida'] && (!FechaRequerida.includes(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['dayFechaRequerida']))){
+            FechaRequerida.push(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['dayFechaRequerida']);
+          }
+          if(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['dayFechaConciliada'] && (!FechaConciliada.includes(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['dayFechaConciliada']))){
+            FechaConciliada.push(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['dayFechaConciliada']);
+          }
+          if(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desUsuarioResponsable'] && (!Responsable.includes(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desUsuarioResponsable']))){
+            Responsable.push(response.restricciones[i]['listaFase'][0]['listaRestricciones'][j]['desUsuarioResponsable']);
+          }
+        }
+      } 
+      for(let k = 0; k < response.tipoRestricciones.length; k ++){
+        TipoRestriccion.push(response.tipoRestricciones[k]['desTipoRestricciones']);
+      }
+      for (let h = 0; h < response.estados.length; h ++){
+        Estado[h] = response.estados[h]['desEstado'];
+      }
+      const Solicitante = response.solicitanteActual;
+      const data_array = [{'Frente': Frente, 'Fase': Fase, 'Actividad': Actividad, 'Restriccion': Restriccion, 'Tipo Restriccion': TipoRestriccion, 'Fecha  Requerida': FechaRequerida, 'Fecha Conciliada': FechaConciliada, 'Responsable': Responsable, 'Estado': Estado, 'Solicitante': Solicitante}];
+      console.log(data_array)
 
       const fileName = "plantilla_data_masiva.xlsx";
-      const data_array = [{'Frente': Frente, 'Fase': Fase, 'Actividad': Actividad, 'Restriccion': Restriccion, 'Tipo Restriccion': TipoRestriccion, 'Fecha  Requerida': FechaRequerida, 'Fecha Conciliada': FechaConciliada, 'Responsable': Responsable, 'Estado': Estado, 'Solicitante': Solicitante}];
       var ws = XLSX.utils.json_to_sheet(data_array);
       var wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws);
