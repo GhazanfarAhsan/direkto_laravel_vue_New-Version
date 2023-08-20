@@ -544,9 +544,8 @@
 <script>
 // import excelParser from "../excel-parser";
 import moment from 'moment'
-import * as XLSX from "xlsx"
-import FileSaver from 'file-saver';
-import * as ExcelJS from "exceljs/dist/exceljs.min.js";
+import * as excelJs from 'exceljs';
+  import { saveAs } from 'file-saver';
 
 import exportFromJSON from "export-from-json";
 import Breadcrumb from "../../components/Layout/Breadcrumb.vue";
@@ -786,8 +785,8 @@ export default {
     store.dispatch("report_restrictions_for_project");
 
    },
-   downloadFile(payload) {
-    store.dispatch("get_datos_restricciones", payload).then((response) => {
+  downloadFile(payload) {
+    store.dispatch("get_datos_restricciones", payload).then(async (response) => {
       const Frente = [];
       const Fase = [];
       const TipoRestriccion = [];
@@ -824,18 +823,64 @@ export default {
       ];
       console.log(data_array)
        // Convert the JSON object array to a worksheet
-       const worksheet = XLSX.utils.json_to_sheet(data_array);
+      //  const worksheet = XLSX.utils.json_to_sheet(data_array);
 
-      // Create a workbook and add the worksheet
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+      // // Create a workbook and add the worksheet
+      // const workbook = XLSX.utils.book_new();
+      // XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
 
-      // Convert the workbook to an XLSX file
-      const xlsxFile = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      // // Convert the workbook to an XLSX file
+      // const xlsxFile = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
 
-      // Save the XLSX file and trigger the download
-      const blob = new Blob([xlsxFile], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      FileSaver.saveAs(blob, 'data.xlsx');
+      // // Save the XLSX file and trigger the download
+      // const blob = new Blob([xlsxFile], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      // saveAs(blob, 'data.xlsx');
+      const workbook = new excelJs.Workbook();
+
+        const ws = workbook.addWorksheet('Test Worksheet');
+     
+
+       
+        ws.addRow(['colA', 'colB', 'colC']);
+        ws.addRow(['colA', 'colB', 'colC']);
+        let ref = this;
+        // this.data.forEach(dt => {
+        //   Object.keys(dt).forEach(key => {
+        //       dt[key].map((opt,index) => {
+        //           ws.addRow([dt[key][index]?dt[key][index]:null, dt[key][index]?dt[key][index]:null, dt[key][index]?dt[key][index]:null]);
+        //       })
+        //   })
+          
+        // });
+        const validationCell1 = ws.getCell('A2');
+        validationCell1.dataValidation = {
+          type: 'list',
+            allowBlank: false,
+            formulae: [`"${ref.data[0].colA.join(',')}"`],
+        };
+
+        const validationCell2 = ws.getCell('B2');
+        validationCell2.dataValidation = {
+          type: 'list',
+            allowBlank: false,
+            formulae: [`"${ref.data[0].colB.join(',')}"`],
+        };
+
+        const validationCell3 = ws.getCell('C2');
+        validationCell3.dataValidation = {
+          type: 'list',
+            allowBlank: false,
+            formulae: [`"${ref.data[0].colC.join(',')}"`],
+        };
+        
+
+        const excelBlob = await workbook.xlsx.writeBuffer();
+        const excelUrl = URL.createObjectURL(
+            new Blob([excelBlob], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+        );
+      
+  
+        saveAs(excelUrl, 'data_with_dropdown.xlsx');
     });
   },
 
